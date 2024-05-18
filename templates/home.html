@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/home.css">
+    <title>home</title>
+</head>
+<body>
+    <h1 class="box" id="one">Login Authentication System</h1>
+    <div class="main">
+        <div class="box" id="two">
+            <h3>Are u new??, click below to register!</h3>
+        </div>
+        <div class="box" id="three">
+            <a href="{{url_for('register')}}">Register</a>
+        </div>
+        <div class="box" id="two">
+            <h3>Already registered??, click below to Login!</h3>
+        </div>
+        <div class="box" id="three">
+            <a href="{{url_for('login')}}">Login</a><br>
+        </div>
+    </div>
+</body>
+</html>

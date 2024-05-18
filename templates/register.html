@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/register.css">
+    <title>register</title>
+
+</head>
+<body>
+    <div class="box">
+        <h1>Register</h1>
+    </div>
+    <form method="POST" action="{{url_for('register')}}">
+        {{form.hidden_tag()}}
+        <div class="main">
+            <label for="username">Username:</label>
+            {{form.username}}
+            <label for="password">Password:</label>
+            {{form.password}}
+            <label for="email">Email:</label>
+            {{form.email}}
+            {%if error%}
+            <div class="error">{{error}}</div>
+            {% endif %}
+            {% if success%}
+            <div class="success">{{success}}</div>
+            {%endif%}
+            {{form.submit}}
+            <a href="{{url_for('login')}}">Already have an account,Login</a>
+    </form>
+</body>
+</html>

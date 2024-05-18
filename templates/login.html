@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/login.css">
+    <title>login</title>
+</head>
+<body>
+    <div class="box">
+        <h1>Login</h1>
+    </div>
+    
+    <form method="POST" action="">
+        {{form.hidden_tag()}}
+        <div class="main">
+            <label for="username">Username:</label>
+            {{form.username}}
+            <label for="password">Password:</label>
+            {{form.password}}
+            {% if error %}
+            <div class="error">{{error}}</div>
+            {% endif %}
+            {{form.submit}}
+            <a href="{{url_for('forgot_password')}}" class="btn" id="b1">Forgot Pwd?</a>
+            <a href="{{url_for('reset_password')}}" class="btn" id="b2">Reset Pwd</a><br><br>
+            <a href="{{url_for('register')}}">Don't have an account, Register now!</a>
+        </div>
+    </form>
+</body>
+</html>
