@@ -1,4 +1,4 @@
-from flask import Flask, render_template,url_for,redirect,flash
+from flask import Flask, render_template,url_for,redirect
 import mysql.connector
 from flask_wtf import FlaskForm
 from wtforms import StringField,PasswordField,SubmitField
@@ -7,22 +7,29 @@ from flask_bcrypt import Bcrypt
 from flask_mail import Mail,Message
 from itsdangerous import URLSafeTimedSerializer
 from flask import request
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "this is a secret key"
 
 #mysql connection
-conn=mysql.connector.connect(host='localhost',user='root',password='oranje57',database='flask')
-cursor=conn.cursor()
+conn= mysql.connector.connect(
+    host=os.environ.get('DB_HOST'),
+    user=os.environ.get('DB_USER'),
+    password=os.environ.get('DB_PASSWORD'),
+    database=os.environ.get('DB_NAME'),
+    port=int(os.environ.get('DB_PORT',3306))
+)
+cursor = conn.cursor()
 
 bcrypt=Bcrypt(app)
 
 #Flask -Mail Configuration
-app.config['MAIL_SERVER']="smtp.googlemail.com"
+app.config['MAIL_SERVER']="smtp.gmail.com"
 app.config['MAIL_PORT']=587
 app.config['MAIL_USE_TLS']=True
 app.config['MAIL_USERNAME']="oranjecloud@gmail.com"
-app.config['MAIL_PASSWORD']="zxvo sbqo ihie ibbp"
+app.config['MAIL_PASSWORD']="kzme hjow uqql eltr"
 
 mail=Mail(app)
 
@@ -45,9 +52,14 @@ class ResetPasswordForm(FlaskForm):
     submit=SubmitField('Reset')
 
 class ForgotPasswordForm(FlaskForm):
+    email = StringField(validators=[InputRequired(), Email(message='Invalid email'), Length(max=120)], render_kw={'placeholder': "email"})
+    submit=SubmitField('Send Password Reset link')
+
+class ChangePasswordForm(FlaskForm):
     username=StringField(validators=[InputRequired(),Length(min=4,max=20)],render_kw={'placeholder':"username"})
-    reset_password=PasswordField(validators=[InputRequired(),Length(min=4,max=20)],render_kw={'placeholder':"new password"})
-    submit=SubmitField('Update password')
+    new_password= PasswordField(validators=[InputRequired(),Length(min=4,max=20)],render_kw={'placeholder':"new password"})
+    submit=SubmitField('Update Password')
+
    
 @app.route('/')
 def home():
@@ -64,7 +76,10 @@ def login():
         user = cursor.fetchone()
         if user:
             if bcrypt.check_password_hash(user[2], password):
-                return redirect(url_for('gallery'))
+                if user[4]==1: #only verified users
+                    return redirect(url_for('gallery'))
+                else:
+                    return render_template("login.html",form=form,error="Please verify your email before logging in")
             else:
                 return render_template("login.html",form=form,error="Wrong password")
         else:
@@ -108,7 +123,8 @@ def reset_password():
             hashed_new_password=bcrypt.generate_password_hash(np).decode('utf-8')
             cursor.execute("update users set password=%s where username=%s",(hashed_new_password,username))
             conn.commit()
-            return redirect(url_for('login'))
+            msg="Password Reset Successful"
+            return render_template('reset_password.html',msg=msg,form=form)
         else:
             error="Invalid username or old password"
             return render_template('reset_password.html',error=error,form=form)
@@ -116,39 +132,80 @@ def reset_password():
     return render_template('reset_password.html',form=form)
 
 
-@app.route('/forgot_password',methods=['GET','POST'])
+@app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
-    form=ForgotPasswordForm()
+    form = ForgotPasswordForm()
     if form.validate_on_submit():
-        username=form.username.data
-        rp=form.reset_password.data
-        cursor.execute("select *from users where username=%s",(username,))
-        user=cursor.fetchone()
+        email= form.email.data
+        cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
+        user = cursor.fetchone()
         if user:
-            hashed_new_password=bcrypt.generate_password_hash(rp).decode('utf-8')
-            cursor.execute("update users set password=%s where username=%s",(hashed_new_password,username))
-            conn.commit()
-            return redirect(url_for('login'))
+            token = serializer.dumps(email, salt='password-reset')
+            reset_link = url_for('change_password', token=token, _external=True)
+
+            msg = Message('Password Reset Request',
+                          sender='oranjecloud@gmail.com',
+                          recipients=[email])
+            msg.html = f'''
+            <p>To rest your password, click the link below:</p>
+            <p><a href="{reset_link}">Reset Password</a></p>
+            <p>If you did not create an account, please ignore this email.</p>'''
+            mail.send(msg)
+
+            success="Reset Link sent to your email"
+            return render_template('forgot_password.html', success=success,form=form)
         else:
-            error="Invalid username"
-            return render_template('forgot_password.html',error=error,form=form)
-        
+            error = "Invalid username"
+            return render_template('forgot_password.html', error=error,form=form)
+    
     return render_template('forgot_password.html',form=form)
 
+@app.route('/change_password', methods=['GET', 'POST'])
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        username=form.username.data
+        np= form.new_password.data
+        cursor.execute("select *from users where username=%s",(username,)) 
+        user=cursor.fetchone() 
+        if user:
+            hashed_new_password=bcrypt.generate_password_hash(np).decode('utf-8')
+            cursor.execute("update users set password=%s where username=%s",(hashed_new_password,username))
+            conn.commit()
+            msg="Password Update Successful"
+            return render_template('change_password.html',msg=msg,form=form)
+        else:
+            error="Invalid username"
+            return render_template('change_password.html',error=error,form=form)
+        
+    return render_template('change_password.html',form=form)
+            
 
 @app.route('/gallery')
 def gallery():
     return render_template('gallery.html')
 
 
-#mail----
-def send_verification_email(email,token):
-    msg = Message('Email Verification', sender='your-email@gmail.com', recipients=[email])
-    verification_url = url_for('verify_email', token=token, external=True)
-    msg.html = f'''<p>To verify your email address, click the link below:</p>
-    <p><a href="{request.host_url}{verification_url}">Verify Email Address</a></p>
-    <p>If you did not create an account, please ignore this email.</p>'''  
-    mail.send(msg)
+#Email Verification---
+#-----------------------------------------------------------------------------------------
+def send_verification_email(email, token):
+    verification_url = url_for('verify_email', token=token, _external=True)
+    msg = Message(
+        'Email Verification',
+        sender='oranjecloud@gmail.com',   # must match MAIL_USERNAME
+        recipients=[email]
+    )
+    msg.html = f'''
+        <p>To verify your email address, click the link below:</p>
+        <p><a href="{verification_url}">Verify Email Address</a></p>
+        <p>If you did not create an account, please ignore this email.</p>
+    '''
+    try:
+        mail.send(msg)
+        print(f"✅ Verification email sent to {email}")
+    except Exception as e:
+        print("❌ Email failed:", str(e))
+
 
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
@@ -174,6 +231,19 @@ def verify_email(token):
         return redirect(url_for('login'))
     else:
         return redirect(url_for('home'))
+#Reset token generation and verification---------------------------------------------------------
+
+def generate_reset_token(email, secret_key, expires_sec=1800):  # 30 min expiry
+    s = URLSafeTimedSerializer(secret_key)
+    return s.dumps(email, salt='password-reset')
+
+def verify_reset_token(token, secret_key, expires_sec=1800):
+    s = URLSafeTimedSerializer(secret_key)
+    try:
+        email = s.loads(token, salt='password-reset', max_age=expires_sec)
+    except:
+        return None
+    return email
 
 if __name__ == "__main__":
     app.run(debug=True)

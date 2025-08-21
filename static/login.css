@@ -8,14 +8,15 @@ body{
 }
 .box
 {
-    text-align:center;
-    width:500px;
-    padding:10px;
-    height:30px;
+    display: flex;
+    justify-content: center;  /* center horizontally */
+    align-items: center;
+
     font-family:"Poppins",sans-serif;
     border-radius:50px;
-    border:10px solid indigo;
-    align-content:center;
+    border:10px solid indigo; 
+    width:40%;
+    height:50px;
     margin:auto;
 }
 .main{
@@ -24,10 +25,11 @@ body{
     left: 50%;
     transform: translate(-50%, -50%);
     border-radius:10px;
-    width:300px;
-    height:360px;
+    width:310px;
+    height:auto;
     padding:20px;
-    align-items:center;
+    display:flex;
+    flex-direction: column;
     background-color:#fff;
     box-shadow: 10px 10px 10px 0px rgba(6, 6, 6, 0.1);
 }
@@ -46,7 +48,7 @@ form label{
     margin-left:20px;
     padding:15px;
     font-weight:bold;
-    font-size:17px;
+    font-size:20px;
     font-family:"Poppins",sans-serif;
     font-weight: 600;
     font-style: normal;
@@ -57,7 +59,7 @@ form input[type="submit"]
     color:#fff;
     cursor:pointer;
     width:250px;
-    margin-top:28px;
+    margin-top:15px;
     margin-left:29px;
     margin-bottom:20px;
 }
@@ -68,29 +70,25 @@ a{
     font-size:13px;
 }
 .error{
-    margin-top:15px;
-    margin-left:35px;
+    margin-top:10px;
+    margin-left:30px;
+    margin-right:10px;
     color:red;
 }
 .btn {
-    margin-top: 20px;
-    margin-bottom:20px;
-    background-color: #007bff;
-    color: white;
-    width:80px;
-    border: none;
-    padding: 7px;
-    text-align: center;
-    text-decoration: none;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: Arial, Helvetica, sans-serif;
-    border-radius: 5px;
-    transition: background-color 0.3s;
+  display: flex;              /* makes children (links) line up in a row */
+  flex-direction: row;        /* row is default, but we keep it explicit */
+  gap: 15px;                  /* spacing between the links */         /* some space above */
 }
-.btn:hover {
+
+.btn a {
+  padding: 8px 12px;          /* button-like padding */
+  text-decoration: none;      /* remove underline */
+  background-color: #007bff;  /* blue background */
+  color: white;               /* white text */
+  border-radius: 5px;         /* rounded corners */
+  transition: 0.3s;
+}
+.btn a:hover {
     background-color: #0056b3;
-}
-#b1{
-    margin-left:50px;
 }

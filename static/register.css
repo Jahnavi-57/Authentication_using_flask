@@ -8,15 +8,15 @@ body{
 }
 .box
 {
-    text-align:center;
-    width:500px;
-    padding:10px;
-    height:30px;
-    font-family: italic;
-    border-radius:50px;
-    border:10px solid darkgreen;
-    align-content:center;
+    display: flex;
+    justify-content: center;  /* center horizontally */
+    align-items: center;
+
     font-family:"Poppins",sans-serif;
+    border-radius:50px;
+    border:10px solid darkgreen; 
+    width:40%;
+    height:50px;
     margin:auto;
 }
 .main{

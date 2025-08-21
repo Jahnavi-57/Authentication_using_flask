@@ -22,8 +22,10 @@
             <div class="error">{{error}}</div>
             {% endif %}
             {{form.submit}}
-            <a href="{{url_for('forgot_password')}}" class="btn" id="b1">Forgot Pwd?</a>
-            <a href="{{url_for('reset_password')}}" class="btn" id="b2">Reset Pwd</a><br><br>
+            <div class="btn">
+                <a href="{{url_for('forgot_password')}}">Forgot Pwd?</a>
+                <a href="{{url_for('reset_password')}}">Reset Pwd</a>
+            </div>
             <a href="{{url_for('register')}}">Don't have an account, Register now!</a>
         </div>
     </form>
