@@ -19,7 +19,7 @@ conn= mysql.connector.connect(
     password=os.environ.get('DB_PASSWORD'),
     database=os.environ.get('DB_NAME'),
     port=int(os.environ.get('DB_PORT',3306)),
-    ssl_ca="ca.pem"
+    ssl_ca=os.path.join(os.path.dirname(__file__), "ca.pem")
 )
 cursor = conn.cursor()
 
