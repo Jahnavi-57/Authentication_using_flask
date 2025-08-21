@@ -110,4 +110,6 @@ Before you begin, ensure you have the following installed on your machine:
 - MySQL Connector
 - Itsdangerous
 
+## Find the video here
+https://www.youtube.com/watch?v=djQnt-SJ2Lc
 
