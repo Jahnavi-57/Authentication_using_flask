@@ -6,7 +6,6 @@ from wtforms.validators import InputRequired, Length,Email
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail,Message
 from itsdangerous import URLSafeTimedSerializer
-from flask import request
 import os
 
 app = Flask(__name__)
